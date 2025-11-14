@@ -14,6 +14,10 @@ class Settings:
     DISCORD_GUILD_ID = os.getenv("DISCORD_GUILD_ID", None)  # Optional, for slash command testing
     ADMIN_ROLE_NAME = os.getenv("ADMIN_ROLE_NAME", "DM")  # Discord role name for admins
     COMMAND_PREFIX = os.getenv("COMMAND_PREFIX", "!")  # Command prefix (! or /)
+    
+    # Bot access control (optional - restrict to specific servers)
+    ALLOWED_GUILD_IDS = os.getenv("ALLOWED_GUILD_IDS", "").split(",") if os.getenv("ALLOWED_GUILD_IDS") else []  # Comma-separated list of allowed server IDs
+    RESTRICT_TO_ALLOWED_SERVERS = os.getenv("RESTRICT_TO_ALLOWED_SERVERS", "false").lower() == "true"  # Set to true to only allow specific servers
 
     # Ollama settings
     OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434")

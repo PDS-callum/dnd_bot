@@ -66,6 +66,18 @@ class DnDBot:
     async def message_handler(self, user_id: str, channel_id: str, message_text: str, is_command: bool, message_obj: Any):
         """Handle incoming messages"""
         try:
+            # Check server restrictions
+            if settings.RESTRICT_TO_ALLOWED_SERVERS and settings.ALLOWED_GUILD_IDS:
+                guild_id = None
+                if hasattr(message_obj, 'guild') and message_obj.guild:
+                    guild_id = str(message_obj.guild.id)
+                
+                if guild_id and guild_id not in settings.ALLOWED_GUILD_IDS:
+                    logger.info(f"Unauthorized server access attempt: {guild_id}")
+                    # Optionally send a message to the unauthorized server
+                    # await self.platform_bot.send_message(channel_id, "❌ This bot is only available in authorized servers.")
+                    return
+
             # Only process commands
             if not is_command:
                 return

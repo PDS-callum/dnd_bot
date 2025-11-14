@@ -30,6 +30,21 @@ class DiscordBot(PlatformBot):
     async def on_ready(self):
         """Called when bot is ready"""
         logger.info(f"{self.bot.user} has connected to Discord!")
+        logger.info(f"Bot is in {len(self.bot.guilds)} server(s)")
+        
+        # Log server information
+        for guild in self.bot.guilds:
+            logger.info(f"  - {guild.name} (ID: {guild.id})")
+        
+        # Check for unauthorized servers if restriction is enabled
+        if settings.RESTRICT_TO_ALLOWED_SERVERS and settings.ALLOWED_GUILD_IDS:
+            for guild in self.bot.guilds:
+                if str(guild.id) not in settings.ALLOWED_GUILD_IDS:
+                    logger.warning(f"⚠️ Bot is in unauthorized server: {guild.name} (ID: {guild.id})")
+                    # Optionally leave the server automatically
+                    # await guild.leave()
+                    # logger.info(f"Left unauthorized server: {guild.name}")
+        
         if settings.DISCORD_GUILD_ID:
             guild = discord.utils.get(self.bot.guilds, id=int(settings.DISCORD_GUILD_ID))
             if guild:
@@ -44,6 +59,14 @@ class DiscordBot(PlatformBot):
         # Only process commands and messages in text channels
         if not isinstance(message.channel, discord.TextChannel):
             return
+
+        # Check if bot is restricted to specific servers
+        if settings.RESTRICT_TO_ALLOWED_SERVERS and settings.ALLOWED_GUILD_IDS:
+            guild_id = str(message.guild.id) if message.guild else None
+            if guild_id not in settings.ALLOWED_GUILD_IDS:
+                # Silently ignore - bot won't respond in unauthorized servers
+                logger.debug(f"Ignoring message from unauthorized server: {guild_id}")
+                return
 
         # Check if it's a command
         is_command = message.content.startswith(settings.COMMAND_PREFIX) or (
